@@ -1,7 +1,6 @@
 '''
 Permitir al usuario buscar un jugador por su nombre y mostrar sus logros,
  como campeonatos de la NBA, participaciones en el All-Star y pertenencia al Salón de la Fama del Baloncesto, etc.
-
 '''
 import json
 import re
