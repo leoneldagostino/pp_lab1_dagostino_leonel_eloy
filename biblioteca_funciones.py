@@ -1,13 +1,13 @@
 def imprimir_opciones():
     print("1-Mostrar la lista de todos los jugadores del Dream Team. \n"
-        "2-seleccionar un jugador por su índice y mostrar sus estadísticas completas \n"
+        "2-Seleccionar un jugador por su índice y mostrar sus estadísticas completas \n"
         "3-Guardar en un archivo CSV las estadisticas de la opcion 2\n"
         "4-Buscar un jugador por su nombre e mostrar sus logros\n"
         "5-Mostrar el promedio de punto por partido de todo el Dream Team ordenando el nombre de forma ascendente\n"
         "6-Buscar por nombre de jugador y comprobar si es parte del salon de la fama\n"
         "7-Mostrar el jugador con la mayor cantidad de rebotes totales\n"
         "8-Mostrar el jugador con el mayor porcentaje de tiros de campo\n"
-        "9-Mostrar el jugador con la mayor cantidad de asistencais totales\n"
+        "9-Mostrar el jugador con la mayor cantidad de asistencias totales\n"
         "10-Mostar los jugadores que promedian mayor a puntos por partido que el valor a ingresar\n"
         "11-Mostar los jugadores que promedian mayor a rebotes por partido que el valor a ingresar\n"
         "12-Mostar los jugadores que promedian mayor a asistencias por partido que el valor a ingresar\n"
@@ -24,11 +24,63 @@ def imprimir_opciones():
 import json
 import re
 
-with open("pp_lab1_dagostino_leonel_eloy/recursos/data.json","r") as data:
-    datos = json.load(data)
-    lista_datos = datos["jugadores"]
+def elegir_opcion():
+    opcion = int("Ingrese la opcion que quiera elegir:")
     
-def mostrar_jugadores(lista:list):
+    return opcion
+
+def ejecutar_opcion(opcion:int,lista):
+    
+    if opcion == 1:
+        mostrar_jugadores_y_posicion(lista)
+    elif opcion == 2:
+        indice = int(input("Indique el indice del jugador: "))
+        mostrar_jugador_por_indice(lista,indice)
+    elif opcion == 3:
+        if guardar_estadisticas_jugador(lista,indice):
+            print("El archivo se creo con exito")
+        else:
+            print("Ocurrio un error al crear al archivo")
+    elif opcion == 4:
+        nombre = input("Que jugador esta buscando: ")
+        mostrar_logros(buscar_jugador_por_nombre(lista,nombre))
+    elif opcion == 5:
+        lista_ordenada_puntos = ordenar_por_parametro(ordenar_por_nombre(lista),"promedio_puntos_por_partido")
+        print(lista_ordenada_puntos)
+    elif opcion == 6:
+        nombre = input("Indique el jugador que busca: ")
+        verificar_jugador_salon_de_la_fama(lista,nombre)
+    elif opcion == 7:
+        mostar_mayor_estadistica(lista,"rebotes_totales")
+    elif opcion == 8:
+        mostar_mayor_estadistica(lista,"porcentaje_tiros_de_campo")
+    elif opcion == 9:
+        mostar_mayor_estadistica(lista,"asistencias_totales")
+    elif opcion == 10:
+        valor = int(input("Ingrese el valor a superar: "))
+        buscar_superior_segun_valor(lista,"promedio_puntos_por_partido",valor)
+    elif opcion == 11:
+        valor = int(input("Ingrese el valor a superar: "))
+        buscar_superior_segun_valor(lista,"promedio_rebotes_por_partido",valor)
+    elif opcion == 12:
+        valor = int(input("Ingrese el valor a superar: "))
+        buscar_superior_segun_valor(lista,"promedio_asistencias_por_partido",valor)
+        
+        
+        
+        
+        
+        
+        
+
+def leer_archivo(ruta:str) -> list:
+    with open(ruta,"r") as data:
+        datos = json.load(data)
+        lista_datos = datos["jugadores"]
+    
+    return lista_datos
+    
+def mostrar_jugadores_y_posicion(lista:list):
     for jugador in lista:
         print(f'{jugador["nombre"]} - {jugador["posicion"]}')
 
@@ -122,12 +174,6 @@ def promedio_menos_menor(lista:list,parametro:str):
     return promedio_sin_menor
 
 
-
-            
-
-
-
-
 def verificar_jugador_salon_de_la_fama(lista,nombre):
     jugador = buscar_jugador_por_nombre(lista,nombre)
     for logro in jugador['logros']:
@@ -159,8 +205,6 @@ def buscar_superior_segun_valor(lista:list,parametro:str,valor:int):
         if valor <= valor_superior:
             lista_superiores.append(nombre_superior)
     
-    for superior in lista_superiores:
-        print(superior)
 
     return lista_superiores
 
@@ -175,9 +219,14 @@ def ordenar_por_posicion(lista:list, lista_2:list):
                     lista = []
                     lista.append(elemento_2['nombre'])
                     diccionario_ordenado[elemento_2['posicion']] = lista
+    
+    for posicion in diccionario_ordenado:
+        print(f'Los jugadores en la posicion {posicion} son: ')
+        for jugador in diccionario_ordenado[posicion]:
+            print(f'*{jugador}')
 
 
-        
+
 def contador_mayor(lista:list,parametro:str):
     cantidad_maximo = 0
     for elemento in lista:
@@ -214,7 +263,7 @@ def ranking(lista_jugadores:list,estadistica:list):
     puesto_ranking = 0
     lista_estadistica = estadistica
     for estadistica in lista_estadistica:
-        lista = ordenar_por_parametro(lista_datos,estadistica,False)
+        lista = ordenar_por_parametro(lista_jugadores,estadistica,False)
         for jugador_nombre in lista_jugadores:
             puesto_ranking = 0
             for jugador in lista:
@@ -246,4 +295,67 @@ def guardar_csv_ranking_jugadores(datos:list,ranking:dict):
                 texto += f'{contenido},'
         archivo.write(texto_encabezado)
         archivo.write(texto)
+
+
+
+def contador_jugador_posicion_basquet(lista:list):
+    lista_contador_posiciones = {
+        "base":0,
+        "escolta":0,
+        "alero":0,
+        "ala-pivot":0,
+        "pivot":0
+    }
+    for jugador in lista:
+        if jugador['posicion'].lower() == "base":
+            lista_contador_posiciones["base"] += 1
+        elif jugador['posicion'].lower() == "escolta":
+            lista_contador_posiciones["escolta"] += 1
+        elif jugador['posicion'].lower() == "alero":
+            lista_contador_posiciones["alero"] += 1
+        elif jugador['posicion'].lower() == "ala-pivot":
+            lista_contador_posiciones["ala-pivot"] += 1
+        elif jugador['posicion'].lower() == "pivot":
+            lista_contador_posiciones["pivot"] += 1
+    
+    for posicion, valor in lista_contador_posiciones.items():
+        print(f'{posicion}: {valor}')
+        
+        
+def ordenar_jugadores_por_all_star(lista:dict):
+    nueva_lista = list(lista.items())
+    rango_a = len(nueva_lista) 
+    flag_swap = True
+
+    while(flag_swap):
+        flag_swap = False
+        rango_a -=1
+        
+        for indice_A in range(rango_a):
+            if  nueva_lista[indice_A][1] > nueva_lista[indice_A+1][1]:
+                nueva_lista[indice_A], nueva_lista[indice_A+1] = nueva_lista[indice_A+1], nueva_lista[indice_A]
+                flag_swap = True
+                
+    lista_definitiva_jugadores = {}
+    for jugador in nueva_lista:
+        lista_definitiva_jugadores[jugador[0]] = jugador[1]
+    return lista_definitiva_jugadores
+
+def jugador_veces_all_star(lista:list):
+    jugador_all_star = {}
+    for jugador in lista:
+        for logro in jugador["logros"]:
+            coincidencia = re.search(r'(\d+) veces All-Star',logro)  
+            if coincidencia != None:
+                jugador_all_star[jugador['nombre']] = coincidencia.string
+    ordenar_jugadores_por_all_star(jugador_all_star)
+    return jugador_all_star
+
+
+
+def mostrar_jugador_orden_all_star(jugadores:dict):
+    for nombre, cantidad_all_star in jugadores.items():
+        print(f'{nombre} ({cantidad_all_star} veces All-star)')
+
+
 
