@@ -19,28 +19,38 @@ def imprimir_opciones():
         "18-Mostrar los jugadores que hayan tenido un porcentaje de tiros triples mayo que el valor a ingresar\n"
         "19-Mostrar el jugador con la mayor cantidad de temporadas jugadas\n"
         "20-Mostrar los jugadores ordenados por posicion que tengan un porcentaje de tiros de campo superior al valor a ingresar\n"
-        "23-Guardar un archivo CSV en forma de ranking de Puntos, Rebotes, Asistencias, Robos\n")
+        "23-Guardar un archivo CSV en forma de ranking de Puntos, Rebotes, Asistencias, Robos\n"
+        "0-Salir",end="\n\n")
 
 import json
 import re
 
 def elegir_opcion():
-    opcion = int("Ingrese la opcion que quiera elegir:")
+    opcion = int(input("Ingrese la opcion que quiera elegir: "))
     
     return opcion
 
+
+
+
+jugador_opcion_tres = None
 def ejecutar_opcion(opcion:int,lista):
-    
+    global jugador_opcion_tres
     if opcion == 1:
+        print("Los jugadores son: ",end="\n")
         mostrar_jugadores_y_posicion(lista)
     elif opcion == 2:
         indice = int(input("Indique el indice del jugador: "))
+        jugador_opcion_tres = indice
         mostrar_jugador_por_indice(lista,indice)
     elif opcion == 3:
-        if guardar_estadisticas_jugador(lista,indice):
-            print("El archivo se creo con exito")
+        if jugador_opcion_tres is not None:
+            if guardar_estadisticas_jugador(lista,jugador_opcion_tres):
+                print("El archivo se creo con exito")
+            else:
+                print("Ocurrio un error al crear al archivo")
         else:
-            print("Ocurrio un error al crear al archivo")
+            print("Debe elegir un jugador primero, selecciona la opcion 2")
     elif opcion == 4:
         nombre = input("Que jugador esta buscando: ")
         mostrar_logros(buscar_jugador_por_nombre(lista,nombre))
@@ -65,24 +75,43 @@ def ejecutar_opcion(opcion:int,lista):
     elif opcion == 12:
         valor = int(input("Ingrese el valor a superar: "))
         buscar_superior_segun_valor(lista,"promedio_asistencias_por_partido",valor)
-        
-        
-        
-        
-        
-        
-        
+    elif opcion == 13:
+        mostar_mayor_estadistica(lista,"robos_totales",valor)
+    elif opcion == 14:
+        mostar_mayor_estadistica(lista,"bloqueos_totales",valor)
+    elif opcion == 15:
+        valor = int(input("Ingrese el valor a superar: "))
+        buscar_superior_segun_valor(lista,"porcentaje_tiros_libres",valor)
+    elif opcion == 16:
+        promedio_menos_menor(lista,"promedio_puntos_por_partido")
+    elif opcion == 17:
+        contador_mayor(lista,"logros")
+    elif opcion == 18:
+        buscar_superior_segun_valor(lista,"porcentaje_tiros_triple",valor)
+    elif opcion == 19:
+        contador_mayor(lista,"temporadas")
+    elif opcion == 20:
+        valor = int(input("Ingrese el valor a superar: "))
+        contador_jugador_posicion_basquet(buscar_superior_segun_valor(lista,"porcentaje_tiros_campo",valor))
+    elif opcion == 23:
+        stats = ["puntos_totales","rebotes_totales","asistencias_totales","robos_totales"]
+        guardar_csv_ranking_jugadores(lista,ranking(lista,stats))
+    
+    print("\n")
+    
 
-def leer_archivo(ruta:str) -> list:
+
+def leer_archivo(ruta:str,datos_buscar:str) -> list:
     with open(ruta,"r") as data:
         datos = json.load(data)
-        lista_datos = datos["jugadores"]
+        lista_datos = datos[datos_buscar]
     
     return lista_datos
     
 def mostrar_jugadores_y_posicion(lista:list):
     for jugador in lista:
         print(f'{jugador["nombre"]} - {jugador["posicion"]}')
+
 
 def mostrar_jugador_por_indice(lista:list, indice:int, imprimir:bool = True) -> list:
     estadisticas_jugador = lista[indice - 1]['estadisticas']
